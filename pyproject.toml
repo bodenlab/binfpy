@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "binfpy"
+description = "binfpy: A Python library for Bioinformatics. The library is primarily intended for teaching bioinformatics and scientific computing at UQ."
+version = "1.0.0"
+authors = [
+  { name="Mikael Boden", email="m.boden@uq.edu.au" },
+]
+readme =  "README.md"
+requires-python = ">=3.5"
+
