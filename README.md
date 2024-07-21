@@ -9,7 +9,7 @@ The code is changing continually and a number of people contribute, so we make n
 
 1) Clone the binfpy repository:
 
-`git clone http://bioinf1.biosci.uq.edu.au/opensource/binfpy.git`
+`git clone https://github.com/bodenlab/binfpy.git`
 
 2) Create a conda environment:
 
