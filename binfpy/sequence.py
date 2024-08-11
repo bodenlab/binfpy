@@ -26,9 +26,10 @@ Email: m.boden@uq.edu.au
 
 import string, sys, re, math, os, array
 import numpy
-from binfpy.webservice import *
-from binfpy.sym import *
-from binfpy.prob import *
+import binfpy
+import binfpy.prob
+import binfpy.sym
+import binfpy.webservice
 
 # Sequence ------------------****
 
@@ -73,8 +74,8 @@ class Sequence(object):
                     )
             self.alphabet = alphabet
         else:
-            for alphaName in preferredOrder:
-                alpha = predefAlphabets[alphaName]
+            for alphaName in binfpy.sym.preferredOrder:
+                alpha = binfpy.sym.predefAlphabets[alphaName]
                 valid = True
                 for sym in self.sequence:
                     if not sym in alpha and (sym != "-" or not gappy):
@@ -383,7 +384,7 @@ def getMarkov(seqs, order=0):
                 raise RuntimeError(
                     "Sequence " + seq.name + " uses an invalid alphabet "
                 )
-    jp = Joint([myalpha for _ in range(order)])
+    jp = binfpy.prob.Joint([myalpha for _ in range(order)])
     for seq in myseqs:
         for i in range(len(seq) - order):
             sub = seq[i : i + order + 1]
@@ -500,7 +501,9 @@ class Alignment:
     def getProfile(self, pseudo=0.0, countGaps=True):
         """Determine the probability matrix from the alignment, assuming
         that each position is independent of all others."""
-        p = IndepJoint([self.alphabet for _ in range(self.alignlen)], pseudo)
+        p = binfpy.prob.IndepJoint(
+            [self.alphabet for _ in range(self.alignlen)], pseudo
+        )
         for seq in self.seqs:
             p.observe(seq, 1, countGaps=countGaps)
         return p
@@ -509,7 +512,7 @@ class Alignment:
         """Construct a consensus sequence."""
         syms = []
         for col in range(self.alignlen):
-            d = Distrib(self.alphabet)
+            d = binfpy.prob.Distrib(self.alphabet)
             for seq in self.seqs:
                 if seq[col] in self.alphabet:
                     d.observe(seq[col])
@@ -550,7 +553,7 @@ class Alignment:
             )
         )
         for col in range(self.alignlen):
-            d = Distrib(self.alphabet)
+            d = binfpy.prob.Distrib(self.alphabet)
             gaps = 0
             for seq in self.seqs:
                 if seq[col] in self.alphabet:
@@ -623,9 +626,9 @@ class Alignment:
                 continue
             alist = list(self.alphabet)
             alist.append("-")
-            gapalphabet = Alphabet(alist)
-            d_gap = Distrib(gapalphabet)
-            d_nogap = Distrib(self.alphabet)
+            gapalphabet = binfpy.sym.Alphabet(alist)
+            d_gap = binfpy.prob.Distrib(gapalphabet)
+            d_nogap = binfpy.prob.Distrib(self.alphabet)
             for seq in self.seqs:
                 if seq[col] in gapalphabet:
                     d_gap.observe(seq[col])
@@ -664,7 +667,7 @@ class Alignment:
     def calcBackground(self):
         """Count the proportion of each amino acid's occurrence in the
         alignment, and return as a probability distribution."""
-        p = Distrib(self.alphabet)
+        p = binfpy.prob.Distrib(self.alphabet)
         for seq in self.seqs:
             for sym in seq:
                 if sym in self.alphabet:  # ignore "gaps"
@@ -944,8 +947,8 @@ def saveConsensus(
         if countgaps:
             alist = list(aln.alphabet)
             alist.append("-")
-            myalpha = Alphabet(alist)
-        d = Distrib(myalpha)
+            myalpha = binfpy.sym.Alphabet(alist)
+        d = binfpy.prob.Distrib(myalpha)
         for seq in aln.seqs:
             if seq[col] in myalpha:
                 d.observe(seq[col])
@@ -1407,7 +1410,7 @@ class PWM(object):
         Specify only a section of the matrix to use with start and end."""
         if isinstance(foreground, Alignment):
             foreground = foreground.getProfile(pseudo=pseudo)
-        if isinstance(foreground, IndepJoint):
+        if isinstance(foreground, binfpy.prob.IndepJoint):
             foreground = foreground.store
         self.start = start
         self.end = end or len(foreground)
@@ -1421,7 +1424,7 @@ class PWM(object):
         # Set foreground probabilities from given alignment
         self.m = numpy.zeros((len(self.symbols), self.length))
         self.fg = foreground[self.start : self.end]
-        self.bg = background or Distrib(
+        self.bg = background or binfpy.prob.Distrib(
             self.alphabet, 1.0
         )  # specified background or uniform
         if not self.alphabet == self.bg.alpha:
@@ -1554,7 +1557,7 @@ def readPWMs(filename, format="MEME"):
                 if myline.startswith("MEME") and len(words) > 1:
                     VERSION = words[len(words) - 1]
                 elif myline.startswith("ALPHABET") and len(words) > 1:
-                    ALPHABET = Alphabet(words[len(words) - 1])
+                    ALPHABET = binfpy.sym.Alphabet(words[len(words) - 1])
                 elif myline.startswith("MOTIF") and len(words) > 1:
                     if MOTIF != None:  # we have one motif that needs to be stored first
                         COLLECTION[MOTIF] = (FOREGROUND, BACKGROUND)
@@ -1577,11 +1580,11 @@ def readPWMs(filename, format="MEME"):
         elif len(words) == 0:
             EXPECT = None
         elif EXPECT.startswith("Background"):
-            BACKGROUND = Distrib(ALPHABET)
+            BACKGROUND = binfpy.prob.Distrib(ALPHABET)
             for z in zip(words[::2], words[1::2]):
                 BACKGROUND.observe(z[0], float(z[1]))
         elif EXPECT.startswith("letter-probability matrix"):
-            d = Distrib(ALPHABET)
+            d = binfpy.prob.Distrib(ALPHABET)
             for z in zip(ALPHABET.symbols, words):
                 d.observe(z[0], float(z[1]) * NSITES)
             FOREGROUND.append(d)
@@ -1605,7 +1608,7 @@ def getSequence(id, database="uniprotkb", start=None, end=None):
 
     for i in range(MAX_TRY):
         try:
-            fastaData = fetch(id, database)
+            fastaData = binfpy.webservice.fetch(id, database)
             seq = readFasta(fastaData)[0]
             break
         except:
@@ -1625,7 +1628,7 @@ def getSequence(id, database="uniprotkb", start=None, end=None):
 def searchSequences(query, database="uniprot"):
     """Search for sequences matching the given query in the given database
     (must be 'uniprot'), and return a list of sequence IDs."""
-    ids = search(query, limit=None)
+    ids = binfpy.webservice.search(query, limit=None)
     return ids
 
 
@@ -1647,7 +1650,7 @@ def runClustal(sequences, method="slow"):
     resultType = "aln-clustal"
     fastaSeqs = "".join([seq.writeFasta() for seq in sequences])
     params = {"alignment": method.lower(), "sequence": fastaSeqs}
-    service = EBI(serviceName)
+    service = binfpy.webservice.EBI(serviceName)
     result = service.submit(params, resultType)
     alignment = readClustal(result, alpha)
     return alignment
@@ -1668,7 +1671,7 @@ def createTree(alignment, type):
         "clustering": type,
         "tossgaps": "true",
     }
-    service = EBI(serviceName)
+    service = binfpy.webservice.EBI(serviceName)
     tree = service.submit(params, resultType)
     return tree
 
@@ -1683,9 +1686,9 @@ def runBLAST(sequence, program="blastp", database="uniprotkb", exp="1e-1"):
         (for nucleotide see http://www.ebi.ac.uk/Tools/sss/ncbiblast/help/index-nucleotide.html#database)
     exp: E-value threshold (select only hits that have a better E-value than this)
     """
-    if sequence.alphabet == predefAlphabets["DNA"]:
+    if sequence.alphabet == binfpy.sym.predefAlphabets["DNA"]:
         stype = "dna"
-    elif sequence.alphabet == predefAlphabets["RNA"]:
+    elif sequence.alphabet == binfpy.sym.predefAlphabets["RNA"]:
         stype = "rna"
     else:
         stype = "protein"
@@ -1700,7 +1703,7 @@ def runBLAST(sequence, program="blastp", database="uniprotkb", exp="1e-1"):
         "stype": stype,
         "exp": exp,
     }
-    service = EBI(serviceName)
+    service = binfpy.webservice.EBI(serviceName)
     idsData, output = service.submit(params, resultTypes)
     ids = []
     for id in idsData.splitlines():
@@ -1710,7 +1713,9 @@ def runBLAST(sequence, program="blastp", database="uniprotkb", exp="1e-1"):
 
 
 if __name__ == "__main__1":
-    aln = readClustalFile("/Users/mikael/simhome/ASR/gappy.aln", Protein_Alphabet)
+    aln = readClustalFile(
+        "/Users/mikael/simhome/ASR/gappy.aln", binfpy.sym.Protein_Alphabet
+    )
     x, g, i = aln.outliers()
     for s in range(len(aln)):
         print(aln[s].name, x[s], g[s], i[s])
@@ -1722,10 +1727,11 @@ if __name__ == "__main__1":
     print(("Read", len(aln), "sequences"))
 
 if __name__ == "__main__":
-    motifs = readPWMs(
-        "/Users/mikael/meme-5.4.1/motif_databases/PROKARYOTE/collectf.meme"
-    )
-    for name in motifs:
-        print(name)
-        for fg in motifs[name][0]:
-            print("\t", fg)
+    seq = Sequence("ACGTACGTACGT", binfpy.sym.DNA_Alphabet)
+    # motifs = readPWMs(
+    #     "/Users/mikael/meme-5.4.1/motif_databases/PROKARYOTE/collectf.meme"
+    # )
+    # for name in motifs:
+    #     print(name)
+    #     for fg in motifs[name][0]:
+    #         print("\t", fg)
