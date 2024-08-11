@@ -5,9 +5,9 @@ Uses and depends on "Alphabet" that is used to define discrete random variables.
 """
 
 import random
-from binfpy.sym import *
+import binfpy.sym
 import math
-import binfpy.sequence as seq
+import binfpy.sequence
 
 #################################################################################################
 # Generic utility functions
@@ -303,7 +303,7 @@ def _readDistrib(linelist):
             )
     if len(d) == 0:
         return None
-    alpha = Alphabet(symstr)
+    alpha = binfpy.sym.Alphabet(symstr)
     if "*" in list(d.keys()):  # tot provided
         for sym in d:
             if sym != "*":
@@ -369,14 +369,14 @@ def _readMultiCount(linelist, format="JASPAR"):
                 ncol = len(counts)
                 if len(name) == 1:  # proper symbol
                     symcount[name] = counts
-        alpha = Alphabet("".join(list(symcount.keys())))
+        alpha = binfpy.sym.Alphabet("".join(list(symcount.keys())))
         distribs = []
         for col in range(ncol):
             d = dict([(sym, symcount[sym][col]) for sym in symcount])
             distribs.append(Distrib(alpha, d))
     elif format == "JASPAR":
         alpha_str = "ACGT"
-        alpha = Alphabet(alpha_str)
+        alpha = binfpy.sym.Alphabet(alpha_str)
         cnt = 0
         for sym in alpha_str:
             line = linelist[cnt].strip()
@@ -464,13 +464,13 @@ class Joint(object):
         """A distribution of n-tuples.
         alphas: Alphabet(s) over which the distribution is defined
         """
-        if type(alphas) is Alphabet:
+        if type(alphas) is binfpy.sym.Alphabet:
             self.alphas = tuple([alphas])
         elif type(alphas) is tuple:
             self.alphas = alphas
         else:
             self.alphas = tuple(alphas)
-        self.store = TupleStore(self.alphas)
+        self.store = binfpy.sym.TupleStore(self.alphas)
         self.totalCnt = 0
 
     def getN(self):
@@ -577,7 +577,7 @@ class IndepJoint(Joint):
         alphas: Alphabet(s) over which the distribution is defined
         """
         self.pseudo = pseudo
-        if type(alphas) is Alphabet:
+        if type(alphas) is binfpy.sym.Alphabet:
             self.alphas = tuple([alphas])
         elif type(alphas) is tuple:
             self.alphas = alphas
@@ -590,7 +590,7 @@ class IndepJoint(Joint):
         return len(self.alphas)
 
     def __iter__(self):
-        return TupleStore(self.alphas).__iter__()
+        return binfpy.sym.TupleStore(self.alphas).__iter__()
 
     def reset(self):
         """Re-set the counts of each distribution. Pseudo-counts are re-applied."""
@@ -692,7 +692,7 @@ class IndepJoint(Joint):
         will not be retrieved and displayed."""
         if self.alphas > 5:
             return "< ... too large to process ... >"
-        tstore = TupleStore(self.alphas)
+        tstore = binfpy.sym.TupleStore(self.alphas)
         str = "< "
         for key in tstore:
             p = 1.0
@@ -710,7 +710,7 @@ class IndepJoint(Joint):
         """In a dictionary-like way return all entries as a list of 2-tuples (key, prob).
         If sort is True, entries are sorted in descending order of probability.
         Note that this function should NOT be used for big (>5 variables) tables."""
-        tstore = TupleStore(self.alphas)
+        tstore = binfpy.sym.TupleStore(self.alphas)
         ret = []
         for key in tstore:
             p = 1.0
@@ -744,7 +744,7 @@ class NaiveBayes:
         output: alphabet that defines the possible values the output variable takes
         pseudo_input: pseudo-count used for each input variable (default is 0.0)
         pseudo_output: pseudo-count used for the output variable (default is 0.0)"""
-        if type(inputs) is Alphabet:
+        if type(inputs) is binfpy.sym.Alphabet:
             self.inputs = tuple([inputs])
         elif type(inputs) is tuple:
             self.inputs = inputs
@@ -801,7 +801,7 @@ class MarkovChain:
         self.startsym = startsym
         self.endsym = endsym
         self.alpha = getTerminatedAlphabet(alpha, self.startsym, self.endsym)
-        self.transit = TupleStore(
+        self.transit = binfpy.sym.TupleStore(
             [self.alpha for _ in range(order)]
         )  # transition probs, i.e. given key (prev state/s) what is the prob of current state
 
@@ -854,7 +854,7 @@ def _terminate(unterm_seq, order=1, startsym="^", endsym="$"):
 
 def getTerminatedAlphabet(alpha, startsym="^", endsym="$"):
     """Amend the given alphabet with termination symbols"""
-    return Alphabet(alpha.symbols + tuple([startsym, endsym]))
+    return binfpy.sym.Alphabet(alpha.symbols + tuple([startsym, endsym]))
 
 
 #################################################################################################
@@ -872,10 +872,10 @@ class HMM:
         > cpg_hmm = prob.HMM('HL','ACGT')
         """
         if isinstance(states, str):
-            states = Alphabet(states)
+            states = binfpy.sym.Alphabet(states)
         self.mystates = getTerminatedAlphabet(states, startstate, endstate)
         if isinstance(symbols, str):
-            symbols = Alphabet(symbols)
+            symbols = binfpy.sym.Alphabet(symbols)
         self.mysymbols = getTerminatedAlphabet(symbols, startstate, endstate)
         self.a = dict()  # transition probabilities
         self.e = dict()  # emission probabilities
@@ -1201,12 +1201,12 @@ def lgamma(x):
 
 if __name__ == "__main__":
     myseqs = [
-        seq.Sequence("TCCTAGCCCC"),
-        seq.Sequence("GCCGCCCCCA"),
-        seq.Sequence("ATCCGCCCGG"),
-        seq.Sequence("CCCCCGCCTT"),
+        binfpy.sequence.Sequence("TCCTAGCCCC"),
+        binfpy.sequence.Sequence("GCCGCCCCCA"),
+        binfpy.sequence.Sequence("ATCCGCCCGG"),
+        binfpy.sequence.Sequence("CCCCCGCCTT"),
     ]
-    mymc = MarkovChain(seq.DNA_Alphabet)
+    mymc = MarkovChain(binfpy.sym.DNA_Alphabet)
     for myseq in myseqs:
         print(myseq, len(myseq))
         mymc.observe(myseq)

@@ -1,5 +1,6 @@
 from collections import defaultdict
-from binfpy.phylo import *
+
+# from binfpy.phylo import *
 import binfpy.phylo as phylo
 import matplotlib
 import random
@@ -350,4 +351,6 @@ class NexusAnnotations:
         return num
 
 
-# tree = phylo.readNewick("/Users/gabefoley/Dropbox/PhD/Projects/Phylo Island/Species trees/species_tree_115.nwk")
+# tree = phylo.readNewick(
+#     "/Users/gabefoley/Dropbox/PhD/Projects/Phylo Island/Species trees/species_tree_115.nwk"
+# )

@@ -6,10 +6,9 @@ A couple of example applications are found at the end of this module.
 """
 
 import numpy
-import binfpy.sym as sym
-import binfpy.prob as prob
-import binfpy.sequence as sequence
-import binfpy.ml as ml
+import binfpy.prob
+import binfpy.sequence
+import binfpy.ml
 
 
 def slidewin(seq, winsize):
@@ -40,13 +39,13 @@ class SeqNN:
         nhidden: number of "hidden" nodes in the net
         cascade: if non-zero, number of positions to feed into a cascaded structure-to-structure NN (also the number of hidden nodes of this NN)
         """
-        self.nn1 = ml.NN(
+        self.nn1 = binfpy.ml.NN(
             inp_len * len(inp_alpha), nhidden, len(outp_alpha)
         )  # neural net
         self.nn2 = None
         self.cascade = cascade
         if cascade > 0:
-            self.nn2 = ml.NN(
+            self.nn2 = binfpy.ml.NN(
                 cascade * len(outp_alpha), cascade, len(outp_alpha)
             )  # cascaded neural net
         self.inp_len = inp_len
@@ -148,13 +147,13 @@ class SeqNN:
                 input = numpy.zeros(self.cascade * len(self.outp_alpha))
                 input[_onehotIndex(self.outp_alpha, subseqs[i])] = 1
                 outvec = self.nn2.feedforward(input)
-                d = prob.Distrib(self.outp_alpha)
+                d = binfpy.prob.Distrib(self.outp_alpha)
                 for k in range(len(outvec)):
                     d.observe(self.outp_alpha[k], outvec[k])
                 predsyms[i + self.cascade / 2] = (
                     d.getmax()
                 )  # use the symbol with the highest probability
-            return sequence.Sequence(predsyms, self.outp_alpha)
+            return binfpy.sequence.Sequence(predsyms, self.outp_alpha)
         else:  # only predict using the first NN
             subseqs = slidewin(inpseq, W)
             predsyms = [
@@ -166,10 +165,10 @@ class SeqNN:
                 input = numpy.zeros(self.inp_len * len(self.inp_alpha))
                 input[_onehotIndex(self.inp_alpha, subseqs[i])] = 1
                 outvec = self.nn1.feedforward(input)
-                d = prob.Distrib(self.outp_alpha)
+                d = binfpy.prob.Distrib(self.outp_alpha)
                 for k in range(len(outvec)):
                     d.observe(self.outp_alpha[k], outvec[k])
                 predsyms[i + W / 2] = (
                     d.getmax()
                 )  # use the symbol with the highest probability
-            return sequence.Sequence(predsyms, self.outp_alpha)
+            return binfpy.sequence.Sequence(predsyms, self.outp_alpha)

@@ -8,6 +8,7 @@ Modifications to package:
 - removed download.py and __main__ because they were not used and __main__ had errors.
 - removed command-line interface because the BED file functionality is implemented more extensively elsewhere
 """
+
 """
 twobitreader
 Licensed under Perl Artistic License 2.0
@@ -21,7 +22,7 @@ from os import R_OK, access
 try:
     from os import strerror
 except ImportError:
-    strerror = lambda x: 'strerror not supported'
+    strerror = lambda x: "strerror not supported"
 from os.path import exists, getsize
 import logging
 import textwrap
@@ -30,12 +31,12 @@ import sys
 if sys.version_info > (3,):
     izip = zip
     xrange = range
-    _CHAR_CODE = 'u'
+    _CHAR_CODE = "u"
     iteritems = dict.items
 else:
     from itertools import izip
 
-    _CHAR_CODE = 'c'
+    _CHAR_CODE = "c"
     iteritems = dict.iteritems
 
 
@@ -54,13 +55,15 @@ def true_long_type():
     OS X uses an 8-byte long, so make sure L (long) is the right size
     and switch to I (int) if needed
     """
-    for type_ in ['L', 'I']:
+    for type_ in ["L", "I"]:
         test_array = array(type_, [0])
         long_size = test_array.itemsize
         if long_size == 4:
             return type_
-    raise ImportError("Couldn't determine a valid 4-byte long type to use \
-as equivalent to LONG")
+    raise ImportError(
+        "Couldn't determine a valid 4-byte long type to use \
+as equivalent to LONG"
+    )
 
 
 LONG = true_long_type()
@@ -68,8 +71,8 @@ LONG = true_long_type()
 
 def byte_to_bases(x):
     """convert one byte to the four bases it encodes"""
-    c = (x >> 4) & 0xf
-    f = x & 0xf
+    c = (x >> 4) & 0xF
+    f = x & 0xF
     cc = (c >> 2) & 0x3
     cf = c & 0x3
     fc = (f >> 2) & 0x3
@@ -80,15 +83,15 @@ def byte_to_bases(x):
 def bits_to_base(x):
     """convert integer representation of two bits to correct base"""
     if x is 0:
-        return 'T'
+        return "T"
     elif x is 1:
-        return 'C'
+        return "C"
     elif x is 2:
-        return 'A'
+        return "A"
     elif x is 3:
-        return 'G'
+        return "G"
     else:
-        raise ValueError('Only integers 0-3 are valid inputs')
+        raise ValueError("Only integers 0-3 are valid inputs")
 
 
 def base_to_bin(x):
@@ -96,22 +99,22 @@ def base_to_bin(x):
     provided for user convenience
     convert a nucleotide to its bit representation
     """
-    if x == 'T':
-        return '00'
-    elif x == 'C':
-        return '01'
-    elif x == 'A':
-        return '10'
-    elif x == 'G':
-        return '11'
+    if x == "T":
+        return "00"
+    elif x == "C":
+        return "01"
+    elif x == "A":
+        return "10"
+    elif x == "G":
+        return "11"
     else:
-        raise ValueError('Only characters \'ATGC\' are valid inputs')
+        raise ValueError("Only characters 'ATGC' are valid inputs")
 
 
 def create_byte_table():
     """create BYTE_TABLE"""
     d = {}
-    for x in xrange(2 ** 8):
+    for x in xrange(2**8):
         d[x] = byte_to_bases(x)
     return d
 
@@ -121,15 +124,15 @@ def split16(x):
     split a 16-bit number into integer representation
     of its course and fine parts in binary representation
     """
-    c = (x >> 8) & 0xff
-    f = x & 0xff
+    c = (x >> 8) & 0xFF
+    f = x & 0xFF
     return c, f
 
 
 def create_twobyte_table():
     """create TWOBYTE_TABLE"""
     d = {}
-    for x in xrange(2 ** 16):
+    for x in xrange(2**16):
         c, f = split16(x)
         d[x] = list(byte_to_bases(c)) + list(byte_to_bases(f))
     return d
@@ -139,8 +142,9 @@ BYTE_TABLE = create_byte_table()
 TWOBYTE_TABLE = create_twobyte_table()
 
 
-def longs_to_char_array(longs, first_base_offset, last_base_offset, array_size,
-                        more_bytes=None):
+def longs_to_char_array(
+    longs, first_base_offset, last_base_offset, array_size, more_bytes=None
+):
     """
     takes in an array of longs (4 bytes) and converts them to bases in
     a char array
@@ -157,12 +161,12 @@ def longs_to_char_array(longs, first_base_offset, last_base_offset, array_size,
     if array_size == 0:
         return array(_CHAR_CODE)
     elif array_size < 0:
-        raise ValueError('array_size must be at least 0')
+        raise ValueError("array_size must be at least 0")
 
     if not first_base_offset in range(16):
-        raise ValueError('first_base_offset must be in range(16)')
+        raise ValueError("first_base_offset must be in range(16)")
     if not last_base_offset in range(1, 17):
-        raise ValueError('last_base_offset must be in range(1, 17)')
+        raise ValueError("last_base_offset must be in range(1, 17)")
 
     longs_len = len(longs)
     if more_bytes is None:
@@ -170,66 +174,69 @@ def longs_to_char_array(longs, first_base_offset, last_base_offset, array_size,
     else:
         shorts_length = len(more_bytes)
     if array_size > longs_len * 16 + 4 * shorts_length:
-        raise ValueError('array_size exceeds maximum possible for input')
+        raise ValueError("array_size exceeds maximum possible for input")
 
-    dna = array(_CHAR_CODE, 'N' * (longs_len * 16 + 4 * shorts_length))
+    dna = array(_CHAR_CODE, "N" * (longs_len * 16 + 4 * shorts_length))
     # translate from 32-bit blocks to bytes
     # this method ensures correct endianess (byteswap as neeed)
     i = 0
     if longs_len > 0:
-        bytes_ = array('B')
+        bytes_ = array("B")
         bytes_.fromstring(longs.tostring())
         # first block
-        first_block = ''.join([''.join(BYTE_TABLE[bytes_[x]]) for x in range(4)])
+        first_block = "".join(["".join(BYTE_TABLE[bytes_[x]]) for x in range(4)])
         i = 16 - first_base_offset
         if array_size < i:
             i = array_size
-        dna[0:i] = array(_CHAR_CODE, first_block[first_base_offset:first_base_offset + i])
+        dna[0:i] = array(
+            _CHAR_CODE, first_block[first_base_offset : first_base_offset + i]
+        )
     if longs_len > 1:
         # middle blocks (implicitly skipped if they don't exist)
         for byte in bytes_[4:-4]:
-            dna[i:i + 4] = array(_CHAR_CODE, BYTE_TABLE[byte])
+            dna[i : i + 4] = array(_CHAR_CODE, BYTE_TABLE[byte])
             i += 4
         # last block
-        last_block = array(_CHAR_CODE, ''.join([''.join(BYTE_TABLE[bytes_[x]])
-                                                for x in range(-4, 0)]))
+        last_block = array(
+            _CHAR_CODE, "".join(["".join(BYTE_TABLE[bytes_[x]]) for x in range(-4, 0)])
+        )
         if more_bytes is None:
-            dna[i:i + last_base_offset] = last_block[0:last_base_offset]
+            dna[i : i + last_base_offset] = last_block[0:last_base_offset]
         else:  # if there are more bytes, we need the whole last block
-            dna[i:i + 16] = last_block[0:16]
+            dna[i : i + 16] = last_block[0:16]
         i += 16
     if more_bytes is not None:
-        bytes_ = array('B')
+        bytes_ = array("B")
         bytes_.fromstring(more_bytes)
         j = i
         for byte in bytes_:
             j = i + 4
             if j > array_size:
-                dnabytes = array(_CHAR_CODE, BYTE_TABLE[byte])[0:(array_size - i)]
+                dnabytes = array(_CHAR_CODE, BYTE_TABLE[byte])[0 : (array_size - i)]
                 dna[i:array_size] = dnabytes
                 break
-            dna[i:i + last_base_offset] = array(_CHAR_CODE, BYTE_TABLE[byte])
+            dna[i : i + last_base_offset] = array(_CHAR_CODE, BYTE_TABLE[byte])
             i += 4
     return dna[0:array_size]
 
 
 class TwoBitFile(dict):
     """
-python-level reader for .2bit files (i.e., from UCSC genome browser)
-(note: no writing support)
-TwoBitFile inherits from dict
-You may access sequences by name, e.g.
->>> genome = TwoBitFile('hg18.2bit')
->>> chr20 = genome['chr20']
-Sequences are returned as TwoBitSequence objects
-You may access intervals by slicing or using str() to dump the entire entry
-e.g.
->>> chr20[100100:100120]
-'ttttcctctaagataatttttgccttaaatactattttgttcaatactaagaagtaagataacttccttttgttggta
-tttgcatgttaagtttttttcc'
->>> whole_chr20 = str(chr20)
-Fair warning: dumping the entire chromosome requires a lot of memory
-See TwoBitSequence for more info
+    python-level reader for .2bit files (i.e., from UCSC genome browser)
+    (note: no writing support)
+    TwoBitFile inherits from dict
+    You may access sequences by name, e.g.
+    >>> genome = TwoBitFile('hg18.2bit')
+    >>> chr20 = genome['chr20']
+    Sequences are returned as TwoBitSequence objects
+    You may access intervals by slicing or using str() to dump the entire entry
+    e.g.
+    >>> chr20[100100:100120]
+    'ttttcctctaagataatttttgccttaaatactattttgttcaatactaagaagtaagataacttccttttgttggta
+    tttgcatgttaagtttttttcc'
+    >>> whole_chr20 = str(chr20)
+    Fair warning: dumping the entire chromosome requires a lot of memory
+    See TwoBitSequence for more info
     """
 
     def __init__(self, foo):
@@ -240,13 +247,13 @@ See TwoBitSequence for more info
             raise IOError(EACCES, strerror(EACCES), foo)
         self._filename = foo
         self._file_size = getsize(foo)
-        self._file_handle = open(foo, 'rb')
+        self._file_handle = open(foo, "rb")
         self._load_header()
         self._load_index()
         for name, offset in iteritems(self._offset_dict):
-            self[name] = TwoBitSequence(self._file_handle, offset,
-                                        self._file_size,
-                                        self._byteswapped)
+            self[name] = TwoBitSequence(
+                self._file_handle, offset, self._file_size, self._byteswapped
+            )
         return
 
     def __reduce__(self):  # enables pickling
@@ -265,13 +272,14 @@ See TwoBitSequence for more info
             header.byteswap()
             (signature2, version, sequence_count, reserved) = header
             if not signature2 == 0x1A412743:
-                raise TwoBitFileError('Signature in header should be ' +
-                                      '0x1A412743, instead found 0x%X' %
-                                      signature)
+                raise TwoBitFileError(
+                    "Signature in header should be "
+                    + "0x1A412743, instead found 0x%X" % signature
+                )
         if not version == 0:
-            raise TwoBitFileError('File version in header should be 0.')
+            raise TwoBitFileError("File version in header should be 0.")
         if not reserved == 0:
-            raise TwoBitFileError('Reserved field in header should be 0.')
+            raise TwoBitFileError("Reserved field in header should be 0.")
         self._byteswapped = byteswapped
         self._sequence_count = sequence_count
 
@@ -282,12 +290,12 @@ See TwoBitSequence for more info
         sequence_offsets = []
         file_handle.seek(16)
         while remaining > 0:
-            name_size = array('B')
+            name_size = array("B")
             name_size.fromfile(file_handle, 1)
             if byteswapped:
                 name_size.byteswap()
             # name = array(_CHAR_CODE)
-            name = array('B')
+            name = array("B")
             name.fromfile(file_handle, name_size[0])
             name = "".join([chr(X) for X in name])
 
@@ -319,26 +327,26 @@ See TwoBitSequence for more info
 
 class TwoBitSequence(object):
     """
-A TwoBitSequence object refers to an entry in a TwoBitFile
-You may access intervals by slicing or using str() to dump the entire entry
-e.g.
->>> genome = TwoBitFile('hg18.2bit')
->>> chr20 = genome['chr20']
->>> chr20[100100:100200] # slicing returns a string
-'ttttcctctaagataatttttgccttaaatactattttgttcaatactaagaagtaagataacttccttttgttggta
-tttgcatgttaagtttttttcc'
->>> whole_chr20 = str(chr20) # get whole chr as string
-Fair warning: dumping the entire chromosome requires a lot of memory
-Note that we follow python/UCSC conventions:
-Coordinates are 0-based, end-open
-(Note: The UCSC web-based genome browser uses 1-based closed coordinates)
-If you attempt to access a slice past the end of the sequence,
-it will be truncated at the end.
-Your computer probably doesn't have enough memory to load a whole genome
-but if you want to string-ize your TwoBitFile, here's a recipe:
-x = TwoBitFile('my.2bit')
-d = x.dict()
-for k,v in d.items(): d[k] = str(v)
+    A TwoBitSequence object refers to an entry in a TwoBitFile
+    You may access intervals by slicing or using str() to dump the entire entry
+    e.g.
+    >>> genome = TwoBitFile('hg18.2bit')
+    >>> chr20 = genome['chr20']
+    >>> chr20[100100:100200] # slicing returns a string
+    'ttttcctctaagataatttttgccttaaatactattttgttcaatactaagaagtaagataacttccttttgttggta
+    tttgcatgttaagtttttttcc'
+    >>> whole_chr20 = str(chr20) # get whole chr as string
+    Fair warning: dumping the entire chromosome requires a lot of memory
+    Note that we follow python/UCSC conventions:
+    Coordinates are 0-based, end-open
+    (Note: The UCSC web-based genome browser uses 1-based closed coordinates)
+    If you attempt to access a slice past the end of the sequence,
+    it will be truncated at the end.
+    Your computer probably doesn't have enough memory to load a whole genome
+    but if you want to string-ize your TwoBitFile, here's a recipe:
+    x = TwoBitFile('my.2bit')
+    d = x.dict()
+    for k,v in d.items(): d[k] = str(v)
     """
 
     def __init__(self, file_handle, offset, file_size, byteswapped=False):
@@ -414,17 +422,17 @@ for k,v in d.items(): d[k] = str(v)
             min_ = 0
         if max_ is not None and max_ < 0:
             if max_ < -dna_size:
-                raise IndexError('index out of range')
+                raise IndexError("index out of range")
             max_ = dna_size + max_
         if min_ is not None and min_ < 0:
             if min_ < -dna_size:
-                raise IndexError('index out of range')
+                raise IndexError("index out of range")
             min_ = dna_size + min_
         # make sure there's a proper range
         if max_ is not None and min_ > max_:
-            return ''
+            return ""
         if max_ == 0 or max_ == min_:
-            return ''
+            return ""
 
         # load all the data
         if max_ is None or max_ > dna_size:
@@ -479,9 +487,13 @@ for k,v in d.items(): d[k] = str(v)
             morebytes = None
         if byteswapped:
             fourbyte_dna.byteswap()
-        str_as_array = longs_to_char_array(fourbyte_dna, first_base_offset,
-                                           last_base_offset, region_size,
-                                           more_bytes=morebytes)
+        str_as_array = longs_to_char_array(
+            fourbyte_dna,
+            first_base_offset,
+            last_base_offset,
+            region_size,
+            more_bytes=morebytes,
+        )
         for start, size in izip(n_block_starts, n_block_sizes):
             end = start + size
             if end <= min_:
@@ -495,17 +507,17 @@ for k,v in d.items(): d[k] = str(v)
             start -= min_
             end -= min_
             # this should actually be decoded, 00=N, 01=n
-            str_as_array[start:end] = array(_CHAR_CODE, 'N' * (end - start))
+            str_as_array[start:end] = array(_CHAR_CODE, "N" * (end - start))
         lower = str.lower
-        first_masked_region = max(0,
-                                  bisect_right(mask_block_starts, min_) - 1)
-        last_masked_region = min(len(mask_block_starts),
-                                 1 + bisect_right(mask_block_starts, max_,
-                                                  lo=first_masked_region))
-        for start, size in izip(mask_block_starts[first_masked_region:
-        last_masked_region],
-                                mask_block_sizes[first_masked_region:
-                                last_masked_region]):
+        first_masked_region = max(0, bisect_right(mask_block_starts, min_) - 1)
+        last_masked_region = min(
+            len(mask_block_starts),
+            1 + bisect_right(mask_block_starts, max_, lo=first_masked_region),
+        )
+        for start, size in izip(
+            mask_block_starts[first_masked_region:last_masked_region],
+            mask_block_sizes[first_masked_region:last_masked_region],
+        ):
             end = start + size
             if end <= min_:
                 continue
@@ -517,8 +529,9 @@ for k,v in d.items(): d[k] = str(v)
                 end = max_
             start -= min_
             end -= min_
-            str_as_array[start:end] = array(_CHAR_CODE,
-                                            lower(safe_tostring(str_as_array[start:end])))
+            str_as_array[start:end] = array(
+                _CHAR_CODE, lower(safe_tostring(str_as_array[start:end]))
+            )
         if not len(str_as_array) == max_ - min_:
             raise RuntimeError("Sequence was the wrong size")
         return safe_tostring(str_as_array)
@@ -536,5 +549,5 @@ class TwoBitFileError(Exception):
     """
 
     def __init__(self, msg):
-        errtext = 'Invalid 2-bit file. ' + msg
+        errtext = "Invalid 2-bit file. " + msg
         return super(TwoBitFileError, self).__init__(errtext)

@@ -1,7 +1,9 @@
-from binfpy.sym import *
+# from binfpy.sym import *
 import itertools
 import sympy
 import math
+import binfpy
+import binfpy.sym
 
 """
 Classes for basic ASR based on an underlying Bayesian network. Does not perform inference of tree topology. Currently 
@@ -229,7 +231,7 @@ class PhyloBNode:
         parent=None,
         distance=None,
         network=None,
-        alpha=Protein_Alphabet,
+        alpha=binfpy.sym.Protein_Alphabet,
         annot=None,
         label=None,
     ):

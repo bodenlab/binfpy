@@ -1,6 +1,7 @@
 import unittest
 
-from binfpy.hca import *
+# from binfpy.hca import *
+import binfpy.hca
 import random
 
 
@@ -22,8 +23,8 @@ class MyTestCase(unittest.TestCase):
                 self.pairidxs2[(i, j)] = self.pairidxs1[(j, i)]
 
     def test_PairArray1(self):
-        pa1 = PairArray(self.N)
-        pa2 = PairArray(self.N)
+        pa1 = binfpy.hca.PairArray(self.N)
+        pa2 = binfpy.hca.PairArray(self.N)
         for p in self.pairidxs1:
             pa1[p] = self.pairidxs1[p]
         for p in self.pairidxs2:
@@ -34,17 +35,17 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(pa2[(j, i)], pa1[(j, i)])
 
     def test_DNode1(self):
-        layer0 = [DNode(i) for i in range(0, 10)]
+        layer0 = [binfpy.hca.DNode(i) for i in range(0, 10)]
         layer1 = []
         for i in range(0, len(layer0) // 2):
             layer1.append(
-                DNode(
+                binfpy.hca.DNode(
                     i + len(layer0),
                     children=[layer0[i * 2], layer0[i * 2 + 1]],
                     dist=random.randint(1, 10),
                 )
             )
-        root = DNode(len(layer0) + len(layer1), layer1, dist=100)
+        root = binfpy.hca.DNode(len(layer0) + len(layer1), layer1, dist=100)
         self.assertEquals(root.nChildren(), len(layer1))
         self.assertEquals(len(root.getLeaves()), len(layer0))
         for i in range(len(layer1)):
@@ -53,31 +54,31 @@ class MyTestCase(unittest.TestCase):
             self.assertEquals(layer0[i].nChildren(), 0)
 
     def test_DNode2(self):
-        layer0 = [DNode(i) for i in range(0, 10)]
+        layer0 = [binfpy.hca.DNode(i) for i in range(0, 10)]
         layer1 = []
         for i in range(0, len(layer0) // 2):
             layer1.append(
-                DNode(
+                binfpy.hca.DNode(
                     i + len(layer0),
                     children=[layer0[i * 2], layer0[i * 2 + 1]],
                     dist=random.randint(1, 10),
                 )
             )
-        root1 = DNode(len(layer0) + len(layer1), layer1, dist=100)
+        root1 = binfpy.hca.DNode(len(layer0) + len(layer1), layer1, dist=100)
         s1 = str(root1)
-        root2 = parse(s1)
+        root2 = binfpy.hca.parse(s1)
         self.assertEquals(root2.nChildren(), root1.nChildren())
         self.assertEquals(len(root2.getLeaves()), len(root1.getLeaves()))
         s2 = str(root2)
-        root3 = parse(s2)
+        root3 = binfpy.hca.parse(s2)
         self.assertEquals(str(root3), s2)
 
     def test_DNode3(self):
-        layer0 = [DNode(i) for i in range(0, 8)]
+        layer0 = [binfpy.hca.DNode(i) for i in range(0, 8)]
         layer1 = []
         for i in range(0, len(layer0) // 2):
             layer1.append(
-                DNode(
+                binfpy.hca.DNode(
                     i + len(layer0),
                     children=[layer0[i * 2], layer0[i * 2 + 1]],
                     dist=random.randint(1, 10),
@@ -86,24 +87,27 @@ class MyTestCase(unittest.TestCase):
         layer2 = []
         for i in range(0, len(layer1) // 2):
             layer2.append(
-                DNode(
+                binfpy.hca.DNode(
                     i + len(layer0) + len(layer1),
                     children=[layer1[i * 2], layer1[i * 2 + 1]],
                     dist=random.randint(11, 20),
                 )
             )
-        root = DNode(len(layer0) + len(layer1) + len(layer2), layer2, dist=30)
+        root = binfpy.hca.DNode(
+            len(layer0) + len(layer1) + len(layer2), layer2, dist=30
+        )
         chars = "ABCDEFGHIJKLMNOP"
         labels_list = [ch for ch in chars]
-        root1 = parse(root.newick(labels_list))
+        root1 = binfpy.hca.parse(root.newick(labels_list))
         labels_rev = [ch for ch in chars[::-1]]
         labels_off1 = [ch for ch in chars[1:]]
         labels_dict = {}
         for i in range(len(labels_list)):
             labels_dict[i] = labels_list[i]
-        root2 = parse(root.newick(labels_dict))
+        root2 = binfpy.hca.parse(root.newick(labels_dict))
         self.assertEquals(
-            len(parse(root.newick(labels_rev)).getLeaves()), len(root.getLeaves())
+            len(binfpy.hca.parse(root.newick(labels_rev)).getLeaves()),
+            len(root.getLeaves()),
         )
         self.assertEquals(root.newick(labels_dict), root.newick(labels_list))
         for ch in chars[:-1]:  # all chars except last one

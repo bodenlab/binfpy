@@ -1,11 +1,11 @@
-import binfpy.sym as sym
+import binfpy.sym  # as sym
 
 
 class RCDict(dict):
     """Class that extends a standard dictionary to accept only fixed-length DNA symbol strings as keys.
     Additionally, it maps the reverse complement to the same value."""
 
-    def __init__(self, alpha=sym.DNA_Alphabet):
+    def __init__(self, alpha=binfpy.sym.DNA_Alphabet):
         """Initialise a reverse-complement dictionary to accept strings of a given alphabet (DNA by default)"""
         self.alpha = alpha
         self.length = None
@@ -20,7 +20,7 @@ class RCDict(dict):
         elif len(key) != self.length:
             raise RuntimeError("Invalid key: " + str(key))
         for i in range(len(key)):
-            if not key[i] in sym.DNA_Alphabet:
+            if not key[i] in binfpy.sym.DNA_Alphabet:
                 raise RuntimeError("Invalid symbol in key: " + str(key[i]))
         super(RCDict, self).__setitem__(self.canonical(key), value)
 

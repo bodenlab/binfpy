@@ -1735,3 +1735,88 @@ if __name__ == "__main__":
     #     print(name)
     #     for fg in motifs[name][0]:
     #         print("\t", fg)
+
+
+""" Below we declare alphabets that are going to be available when
+this module is imported """
+Bool_Alphabet = binfpy.sym.Alphabet("TF")
+DNA_Alphabet = binfpy.sym.Alphabet("ACGT")
+DNA_Alphabet_wN = binfpy.sym.Alphabet("ACGTN")
+RNA_Alphabet_wN = binfpy.sym.Alphabet("ACGUN")
+RNA_Alphabet = binfpy.sym.Alphabet("ACGU")
+Protein_Alphabet = binfpy.sym.Alphabet("ACDEFGHIKLMNPQRSTVWY")
+Protein_Alphabet_wX = Protein_wX = binfpy.sym.Alphabet("ACDEFGHIKLMNPQRSTVWYX")
+Protein_Alphabet_wSTOP = Protein_wSTOP = binfpy.sym.Alphabet("ACDEFGHIKLMNPQRSTVWY*")
+Protein_wGAP = binfpy.sym.Alphabet("ACDEFGHIKLMNPQRSTVWY-")
+DSSP_Alphabet = binfpy.sym.Alphabet("GHITEBSC")
+DSSP3_Alphabet = binfpy.sym.Alphabet("HEC")
+
+predefAlphabets = {
+    "Bool_Alphabet": Bool_Alphabet,
+    "DNA": DNA_Alphabet,
+    "RNA": RNA_Alphabet,
+    "DNAwN": RNA_Alphabet_wN,
+    "RNAwN": DNA_Alphabet_wN,
+    "Protein": Protein_Alphabet,
+    "ProteinwX": Protein_wX,
+    "ProteinwSTOP": Protein_wSTOP,
+    "ProteinwGAP": Protein_wGAP,
+    "DSSP_Alphabet": DSSP_Alphabet,
+    "DSSP3_Alphabet": DSSP3_Alphabet,
+}
+# The preferred order in which a predefined alphabet is assigned to a sequence
+# (e.g., we'd want to assign DNA to 'AGCT', even though Protein is also valid)
+preferredOrder = [
+    "Bool_Alphabet",
+    "DNA",
+    "RNA",
+    "DNAwN",
+    "RNAwN",
+    "Protein",
+    "ProteinwX",
+    "ProteinwSTOP",
+    "ProteinwGAP",
+    "DSSP_Alphabet",
+    "DSSP3_Alphabet",
+]
+# Useful annotations
+DNA_Alphabet.annotateAll(
+    "html-color", {"A": "green", "C": "orange", "G": "red", "T": "#66bbff"}
+)
+RNA_Alphabet.annotateAll(
+    "html-color", {"A": "green", "C": "orange", "G": "red", "U": "#66bbff"}
+)
+# Protein_Alphabet.annotateAll('html-color', {'G':'orange','P':'orange','S':'orange','T':'orange','H':'red','K':'red','R':'red','F':'#66bbff','Y':'#66bbff','W':'#66bbff','I':'green','L':'green','M':'green','V':'green'})
+Protein_Alphabet.annotateAll(
+    "html-color",
+    {
+        # orange*/
+        "G": "#F5A259",
+        # green*/
+        "N": "#00f900",
+        "Q": "#00f900",
+        "S": "#00f900",
+        "T": "#00f900",
+        # red*/
+        "K": "#f62f00",
+        "R": "#f62f00",
+        # blue/purple*/
+        "A": "#92b2f3",
+        "I": "#92b2f3",
+        "L": "#92b2f3",
+        "M": "#92b2f3",
+        "V": "#92b2f3",
+        "W": "#92b2f3",
+        "F": "#92b2f3",
+        # yellow*/
+        "P": "#FFFB00",
+        # pink*/
+        "C": "#F59692",
+        # aqua*/
+        "H": "#04B2B3",
+        "Y": "#04B2B3",
+        # purple*/
+        "D": "#CE64CB",
+        "E": "#CE64CB",
+    },
+)

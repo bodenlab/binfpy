@@ -1,5 +1,5 @@
 import unittest
-from binfpy.heap import *
+import binfpy.heap
 import random
 
 
@@ -10,8 +10,8 @@ class MyTestCase(unittest.TestCase):
         idxs = [i for i in range(random.randint(0, 10), random.randint(10, 50))]
         random.shuffle(idxs)
         self.a = [(idx, random.random()) for idx in idxs]
-        self.mh = LabelHeap(len(self.a))
-        self.maxh = LabelHeap(len(self.a), reverse=True)
+        self.mh = binfpy.heap.LabelHeap(len(self.a))
+        self.maxh = binfpy.heap.LabelHeap(len(self.a), reverse=True)
         for address, value in self.a:
             self.mh.add(address, value)
             self.maxh.add(address, value)
@@ -44,7 +44,7 @@ class MyTestCase(unittest.TestCase):
             self.maxh.pop()
 
     def test_MinHeap4(self):
-        mh1 = LabelHeap(10)
+        mh1 = binfpy.heap.LabelHeap(10)
         self.assertEquals(len(mh1), 0)
         mh1.add("a", 2)
         self.assertEquals(len(mh1), 1)

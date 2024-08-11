@@ -3,12 +3,13 @@
 import sys, math, random, getopt
 import numpy as np
 import matplotlib.pyplot as plt
-import binfpy.prob as prb
-import binfpy.sequence as sequence
-import binfpy.stats as stats
-from binfpy.rcdict import *
+import binfpy.prob
+import binfpy.sequence
+import binfpy.stats
+import binfpy.sym
+import binfpy.rcdict
 import operator  # for use with key= in max() function
-import binfpy.binomial as binomial
+import binfpy.binomial
 
 
 def slidewin(seq, winsize):
@@ -26,8 +27,8 @@ def countWordsReport(seqs, WordWidth=8, PeakWidth=100, PeakMargin=100):
     PeakWidth: width of window around centre of sequence
     PeakMargin: the width of the margin on each side of the centre window
     (which delineates the positives around peak from negatives away from peak)."""
-    pos = RCDict()  # reverse complement-aware dictionary for DNA
-    neg = RCDict()  # reverse complement-aware dictionary for DNA
+    pos = binfpy.rcdict.RCDict()  # reverse complement-aware dictionary for DNA
+    neg = binfpy.rcdict.RCDict()  # reverse complement-aware dictionary for DNA
     for seq in seqs:
         centre = len(seq) / 2  # find peak
         """ Construct all words around peak (positives) and count their presence """
@@ -48,7 +49,9 @@ def countWordsReport(seqs, WordWidth=8, PeakWidth=100, PeakMargin=100):
             except KeyError:
                 neg[word] = 1
 
-    logratio = RCDict()  # DNA dictionary for storing the log-ration between pos and neg
+    logratio = (
+        binfpy.rcdict.RCDict()
+    )  # DNA dictionary for storing the log-ration between pos and neg
     for word, cnt_pos in list(pos.items()):
         cnt_neg = 0.0001
         try:
@@ -70,7 +73,7 @@ def countWordsReport(seqs, WordWidth=8, PeakWidth=100, PeakMargin=100):
         except KeyError:
             cnt_neg = 0
         # Compute p-value using Fisher's Exact test
-        pval = stats.getFETpval(
+        pval = binfpy.stats.getFETpval(
             cnt_pos,
             cnt_neg,
             len(seqs) * (PeakWidth - WordWidth + 1) - cnt_pos,
@@ -104,8 +107,8 @@ def scanMotifReport(seqs, motif, threshold=0, jaspar="JASPAR_matrices.txt"):
             return
 
     # create the motif and its reverse complemennt
-    bg = prb.Distrib(sym.DNA_Alphabet, sequence.getCount(seqs))
-    d = prb.readMultiCounts(jaspar)
+    bg = binfpy.prob.Distrib(binfpy.sym.DNA_Alphabet, binfpy.sequence.getCount(seqs))
+    d = binfpy.prob.readMultiCounts(jaspar)
     try:
         fg1 = d[motif]
         fg2 = getReverse(d[motif])
@@ -113,10 +116,10 @@ def scanMotifReport(seqs, motif, threshold=0, jaspar="JASPAR_matrices.txt"):
         usage(sys.argv[0], "Unknown motif %s" % motif)
         return
     print("Motif %s:" % motif)
-    pwm1 = sequence.PWM(fg1, bg)
+    pwm1 = binfpy.sequence.PWM(fg1, bg)
     pwm1.display(format="JASPAR")
     print("Motif %s (reverse complement):" % motif)
-    pwm2 = sequence.PWM(fg2, bg)
+    pwm2 = binfpy.sequence.PWM(fg2, bg)
     pwm2.display(format="JASPAR")
 
     # initialize things to zero
@@ -199,8 +202,8 @@ def scanMotifReport_new(
             return
 
     # create the motif and its reverse complemennt
-    bg = prb.Distrib(sym.DNA_Alphabet, sequence.getCount(seqs))
-    d = prb.readMultiCounts(jaspar)
+    bg = binfpy.prob.Distrib(binfpy.sym.DNA_Alphabet, binfpy.sequence.getCount(seqs))
+    d = binfpy.prob.readMultiCounts(jaspar)
     try:
         fg1 = d[motif]
         fg2 = getReverse(d[motif])
@@ -208,10 +211,10 @@ def scanMotifReport_new(
         usage(sys.argv[0], "Unknown motif %s" % motif)
         return
     print("Motif %s:" % motif)
-    pwm1 = sequence.PWM(fg1, bg)
+    pwm1 = binfpy.sequence.PWM(fg1, bg)
     pwm1.display(format="JASPAR")
     print("Motif %s (reverse complement):" % motif)
-    pwm2 = sequence.PWM(fg2, bg)
+    pwm2 = binfpy.sequence.PWM(fg2, bg)
     pwm2.display(format="JASPAR")
 
     # initialize things to zero
@@ -341,7 +344,7 @@ if __name__ == "__main__":
     if FILENAME == None:
         usage(sys.argv[0], "Filename not specified")
         sys.exit(3)
-    seqs = sequence.readFastaFile(FILENAME, sym.DNA_Alphabet_wN)
+    seqs = binfpy.sequence.readFastaFile(FILENAME, binfpy.sym.DNA_Alphabet_wN)
     if DISCOVER_MODE:
         print(
             "Discover (f=%s; w=%d; p=%d; m=%d)"

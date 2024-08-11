@@ -60,7 +60,7 @@ def search(query, dbName="uniprot", format="list", limit=100, columns=""):
     dbName: name of database e.g. 'uniprot', "refseq:protein", "refseq:pubmed"
     format: file format e.g. 'list', 'fasta' or 'txt'
     limit: max number of results (specify None for all results)
-    See http://www.uniprot.org/faq/28 for more info re UniprotKB's URL syntax
+    See http://www.uniprot.org/faq/28 for more info re Unipro tKB's URL syntax
     See http://www.ncbi.nlm.nih.gov/books/NBK25499/ for more on NCBI's E-utils
     """
     if dbName.startswith("uniprot"):

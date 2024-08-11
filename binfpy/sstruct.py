@@ -3,7 +3,7 @@ Module sstruct -- methods for protein secondary structure
 """
 
 import binfpy.sequence as sequence
-import binfpy.sym as sym
+import binfpy.sym
 
 cf_dict = {  # Chou-Fasman table
     #     P(a), P(b), P(t),    f(i), f(i+1), f(i+2), f(i+3)
@@ -29,8 +29,8 @@ cf_dict = {  # Chou-Fasman table
     "V": (106, 170, 50, 0.062, 0.048, 0.028, 0.053),
 }  # Valine
 
-prot_alpha = sym.Protein_Alphabet
-sstr_alpha = sym.DSSP3_Alphabet
+prot_alpha = binfpy.sym.Protein_Alphabet
+sstr_alpha = binfpy.sym.DSSP3_Alphabet
 
 
 def makesstr(seq, sym="*", gap="-"):

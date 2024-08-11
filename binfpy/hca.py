@@ -3,7 +3,7 @@ import numpy as np
 from scipy.cluster import hierarchy
 import matplotlib.pyplot as plt
 import binfpy.stats as stats
-from binfpy.heap import *
+# from binfpy.heap import *
 
 
 class PairArray:
