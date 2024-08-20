@@ -1,4 +1,5 @@
 import binfpy.ival as ival
+import random
 
 
 class BedEntry:
@@ -363,12 +364,20 @@ class BedFile:
             return next(iter(all))
 
     def getOneOfOverlap(self, item):
+        random.seed(420)
         all = self.getOverlap(item)
         if all == None:
             return None
         elif len(all) == 0:
             return None
         else:
+            # return the shortest distance between item and all
+            # print(min(all, key=lambda x: dist(x, item)))
+            # return min(all, key=lambda x: dist(x, item))
+            return min(
+                all, key=lambda x: dist(x, item, centre2centre=True)
+            )  # returns the smallest distance
+
             return next(iter(all))
 
 
