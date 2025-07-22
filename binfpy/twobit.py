@@ -182,7 +182,7 @@ def longs_to_char_array(
     i = 0
     if longs_len > 0:
         bytes_ = array("B")
-        bytes_.fromstring(longs.tostring())
+        bytes_.frombytes(longs.tobytes())
         # first block
         first_block = "".join(["".join(BYTE_TABLE[bytes_[x]]) for x in range(4)])
         i = 16 - first_base_offset
@@ -207,7 +207,7 @@ def longs_to_char_array(
         i += 16
     if more_bytes is not None:
         bytes_ = array("B")
-        bytes_.fromstring(more_bytes)
+        bytes_.frombytes(more_bytes)
         j = i
         for byte in bytes_:
             j = i + 4
