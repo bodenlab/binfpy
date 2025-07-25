@@ -7,7 +7,7 @@ The code is changing continually and a number of people contribute, so we make n
 
 ## Installation
 
-Watch the installation demo [here](https://youtu.be/22F-_153DVw?si=wEywFzwhXHfwLqkj).
+Watch the installation demo for Mac/Linux [here](https://youtu.be/22F-_153DVw?si=wEywFzwhXHfwLqkj). Watch the Windows installation [here](https://youtu.be/_QCtiOPDfO4).
 
 1) Clone the binfpy repository:
 
