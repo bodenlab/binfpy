@@ -38,6 +38,10 @@ cd <path-to-download>/binfpy
 ```
 pip install -e .
 ```
+6) We recommend installing Jupyterlab so that you can easily use notebook (.ipynb) files
+```
+pip install jupyterlab
+```
 
 ## Usage in a notebook
 
