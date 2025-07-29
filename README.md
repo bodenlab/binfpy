@@ -40,7 +40,7 @@ pip install -e .
 ```
 6) We recommend installing Jupyterlab so that you can easily use notebook (.ipynb) files
 ```
-pip install jupyterlab
+pip install jupyterlab notebook
 ```
 
 ## Usage in a notebook
