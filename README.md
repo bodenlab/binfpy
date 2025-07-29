@@ -18,7 +18,7 @@ git clone https://github.com/bodenlab/binfpy.git
 2) Create a conda environment:
 
 ```
-conda create --name binfpy python=3.8
+conda create --name binfpy python=3.10
 ```
 
 3) Activate the environment:
